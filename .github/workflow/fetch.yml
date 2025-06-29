@@ -1,0 +1,31 @@
+name: Fetch and Update Files
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Fetch files
+        run: |
+          mkdir -p public
+          curl -s https://www.w3schools.com/xml/note.xml -o public/note.xml
+          curl -s https://jsonplaceholder.typicode.com/posts/1 -o public/post1.json
+          curl -s https://www.w3.org/TR/PNG/iso_8859-1.txt -o public/sample.txt
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git add public/*
+          git commit -m "Auto update files" || echo "No changes"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
